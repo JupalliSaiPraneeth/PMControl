@@ -14,6 +14,7 @@ val TextPrimary = Color(0xFFF8FAFC)
 val TextSecondary = Color(0xFF94A3B8)
 val EmeraldSuccess = Color(0xFF10B981)
 val RoseError = Color(0xFFF43F5E)
+val AmberWarning = Color(0xFFF59E0B)
 
 private val DarkColorScheme = darkColorScheme(
     primary = SkyPrimary,
