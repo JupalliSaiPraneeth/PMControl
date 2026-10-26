@@ -34,21 +34,16 @@ jobs:
         run: |
           yes | sdkmanager --licenses || yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
-      - name: Generate Release Signing Keystore
-        run: |
-          keytool -genkeypair -v \
-            -keystore android/app/release.jks \
-            -alias omnicontrol \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass omnicontrol123 \
-            -keypass omnicontrol123 \
-            -dname "CN=OmniControl, OU=Mobile, O=OmniControl, L=SF, ST=CA, C=US"
-
       - name: Build Signed APK with Gradle
         working-directory: ./android
         run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Verify APK Signatures
+        run: |
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          echo "Verifying signatures on $APK..."
+          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$APK" || \
+          $ANDROID_HOME/build-tools/34.0.0/apksigner verify --verbose "$APK"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

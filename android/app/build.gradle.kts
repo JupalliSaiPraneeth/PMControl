@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.omnicontrol.app"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
 
@@ -23,35 +23,26 @@ android {
 
     signingConfigs {
         create("release") {
-            val ksFile = file("release.jks")
-            if (ksFile.exists()) {
-                storeFile = ksFile
-                storePassword = "omnicontrol123"
-                keyAlias = "omnicontrol"
-                keyPassword = "omnicontrol123"
-                v1SigningEnabled = true
-                v2SigningEnabled = true
-            }
+            storeFile = file("release.keystore")
+            storePassword = "omnicontrol123"
+            keyAlias = "omnicontrol"
+            keyPassword = "omnicontrol123"
+            enableV1Signing = true
+            enableV2Signing = true
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            val releaseConfig = signingConfigs.getByName("release")
-            if (releaseConfig.storeFile?.exists() == true) {
-                signingConfig = releaseConfig
-            }
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
         debug {
-            val releaseConfig = signingConfigs.getByName("release")
-            if (releaseConfig.storeFile?.exists() == true) {
-                signingConfig = releaseConfig
-            }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
