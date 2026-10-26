@@ -38,6 +38,29 @@ jobs:
         working-directory: ./android
         run: gradle assembleRelease --no-daemon --stacktrace
 
+      - name: Sign APK with V1 (JAR), V2, and V3 Schemes
+        run: |
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          echo "Explicitly applying V1 (JAR) and V2 signatures via apksigner..."
+          ($ANDROID_HOME/build-tools/35.0.0/apksigner sign \
+            --ks android/app/release.keystore \
+            --ks-pass pass:omnicontrol123 \
+            --ks-key-alias omnicontrol \
+            --key-pass pass:omnicontrol123 \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            "$APK") || \
+          ($ANDROID_HOME/build-tools/34.0.0/apksigner sign \
+            --ks android/app/release.keystore \
+            --ks-pass pass:omnicontrol123 \
+            --ks-key-alias omnicontrol \
+            --key-pass pass:omnicontrol123 \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            "$APK")
+
       - name: Verify APK Signatures
         run: |
           APK="android/app/build/outputs/apk/release/app-release.apk"
