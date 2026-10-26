@@ -1,6 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { db } from '../services/dbStore.js';
 import { sessionService } from '../services/sessionService.js';
+import { iceService } from '../services/iceService.js';
 import { RemoteControlActionSchema } from '../types/index.js';
 
 interface SocketAuthData {
@@ -12,8 +13,8 @@ interface SocketAuthData {
 
 export function setupSignaling(io: SocketIOServer) {
   io.on('connection', (socket: Socket) => {
-    // 1. Join Session Room with Authorization Check
-    socket.on('session:join', async (data: SocketAuthData, callback?: (res: { ok: boolean; error?: string }) => void) => {
+    // 1. Join Session Room with Authorization Check & Dynamic ICE Server Distribution
+    socket.on('session:join', async (data: SocketAuthData, callback?: (res: { ok: boolean; iceServers?: any[]; error?: string }) => void) => {
       try {
         const { sessionId, role, userId, deviceId } = data;
         const session = await db.getSessionById(sessionId);
@@ -40,10 +41,13 @@ export function setupSignaling(io: SocketIOServer) {
         socket.join(room);
         socket.data = { sessionId, role, userId, deviceId };
 
+        // Generate dynamic ICE servers (STUN + TURN with short-lived credentials)
+        const iceServers = iceService.getIceServers(userId || deviceId);
+
         // Notify room that participant has joined
         socket.to(room).emit('session:participant_joined', { role, timestamp: new Date().toISOString() });
 
-        callback?.({ ok: true });
+        callback?.({ ok: true, iceServers });
       } catch (err: any) {
         callback?.({ ok: false, error: err.message });
       }
@@ -68,6 +72,33 @@ export function setupSignaling(io: SocketIOServer) {
       const { sessionId } = socket.data as SocketAuthData;
       if (!sessionId) return;
       socket.to(`session:${sessionId}`).emit('webrtc:ice-candidate', payload);
+    });
+
+    // 4b. WebRTC ICE Restart (for network recovery across Wi-Fi / Cellular changes)
+    socket.on('webrtc:ice-restart', (payload?: any) => {
+      const { sessionId, role } = socket.data as SocketAuthData;
+      if (!sessionId) return;
+      socket.to(`session:${sessionId}`).emit('webrtc:ice-restart', {
+        initiatedBy: role,
+        timestamp: new Date().toISOString(),
+        ...payload,
+      });
+    });
+
+    // 4c. Voice Transmission State (Device owner controls microphone transmission)
+    socket.on('voice:state-change', (payload: { state: 'active' | 'muted' | 'stopped'; error?: string }) => {
+      const { sessionId, role } = socket.data as SocketAuthData;
+      if (!sessionId) return;
+      socket.to(`session:${sessionId}`).emit('voice:state-update', {
+        ...payload,
+        updatedBy: role,
+        timestamp: new Date().toISOString(),
+      });
+    });
+
+    // 4d. Signaling Liveness & RTT Ping-Pong
+    socket.on('webrtc:ping', (timestamp: number) => {
+      socket.emit('webrtc:pong', timestamp);
     });
 
     // 5. Authorized Remote Interaction Action (Controller -> Device)

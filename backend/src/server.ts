@@ -1,8 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
+import fs from 'fs';
 import { deviceRouter } from './routes/deviceRoutes.js';
 import { sessionRouter } from './routes/sessionRoutes.js';
+import { webrtcRouter } from './routes/webrtcRoutes.js';
 import { config } from './config/env.js';
 
 export function createExpressApp() {
@@ -41,9 +44,38 @@ export function createExpressApp() {
     });
   });
 
+  // Direct APK download endpoint with Android MIME type to prevent parsing corruption
+  app.get(['/download/OmniControl.apk', '/OmniControl.apk'], (_req: Request, res: Response) => {
+    const candidatePaths = [
+      path.resolve(process.cwd(), '../frontend/public/OmniControl.apk'),
+      path.resolve(process.cwd(), 'public/OmniControl.apk'),
+      path.resolve(process.cwd(), '../OmniControl.apk'),
+    ];
+
+    const apkPath = candidatePaths.find((p) => fs.existsSync(p));
+    if (!apkPath) {
+      res.status(404).json({ error: 'OmniControl.apk not found. Please build or download from GitHub Releases.' });
+      return;
+    }
+
+    const stat = fs.statSync(apkPath);
+    res.writeHead(200, {
+      'Content-Type': 'application/vnd.android.package-archive',
+      'Content-Length': stat.size,
+      'Content-Disposition': 'attachment; filename="OmniControl.apk"',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
+
+    const stream = fs.createReadStream(apkPath);
+    stream.pipe(res);
+  });
+
   // API v1 routes
   app.use('/api/v1/devices', deviceRouter);
   app.use('/api/v1/sessions', sessionRouter);
+  app.use('/api/v1/webrtc', webrtcRouter);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {

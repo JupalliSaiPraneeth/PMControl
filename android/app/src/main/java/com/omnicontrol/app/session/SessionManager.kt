@@ -18,6 +18,7 @@ data class ActiveSessionState(
     val deviceId: String? = null,
     val isSharingScreen: Boolean = false,
     val isSharingAudio: Boolean = false,
+    val isMicMuted: Boolean = false,
     val sessionDurationSeconds: Long = 0,
     val statusMessage: String = "Ready for Support Session"
 )
@@ -51,10 +52,26 @@ object SessionManager {
                     deviceId = deviceId,
                     isSharingScreen = true,
                     isSharingAudio = true,
+                    isMicMuted = false,
                     statusMessage = "Live Screen Sharing and Audio Active"
                 )
             }
         }
+    }
+
+    fun toggleMicrophone() {
+        val current = _sessionState.value
+        if (!current.isActive) return
+        val newMuted = !current.isMicMuted
+        webRtcManager?.setMicrophoneMuted(newMuted)
+        _sessionState.value = current.copy(isMicMuted = newMuted)
+    }
+
+    fun stopVoiceTransmission() {
+        val current = _sessionState.value
+        if (!current.isActive) return
+        webRtcManager?.stopVoiceTransmission()
+        _sessionState.value = current.copy(isSharingAudio = false, isMicMuted = true)
     }
 
     fun prepareSession(sessionId: String, deviceId: String) {

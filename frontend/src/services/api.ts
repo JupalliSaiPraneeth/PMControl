@@ -75,6 +75,10 @@ class ApiClient {
   getSessionEvents(sessionId: string): Promise<SessionEvent[]> {
     return this.request<SessionEvent[]>(`/api/v1/sessions/${sessionId}/events`);
   }
+
+  getIceServers(): Promise<{ iceServers: RTCIceServer[]; ttlSeconds: number }> {
+    return this.request<{ iceServers: RTCIceServer[]; ttlSeconds: number }>('/api/v1/webrtc/ice-servers');
+  }
 }
 
 export const api = new ApiClient();

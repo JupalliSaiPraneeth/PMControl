@@ -68,12 +68,52 @@ fun ActiveSessionScreen(
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Active Streams", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = SkyPrimary)
                     Text("• Screen Capture: Active (MediaProjection)", fontSize = 12.sp, color = TextSecondary)
-                    Text("• Audio Transmission: Active (Microphone)", fontSize = 12.sp, color = TextSecondary)
-                    Text("• E2E Security: WebRTC DTLS/SRTP", fontSize = 12.sp, color = TextSecondary)
+                    Text(
+                        text = if (!sessionState.isSharingAudio) {
+                            "• Audio Transmission: Stopped by User"
+                        } else if (sessionState.isMicMuted) {
+                            "• Audio Transmission: Muted"
+                        } else {
+                            "• Audio Transmission: Transmitting Live Voice"
+                        },
+                        fontSize = 12.sp,
+                        color = if (sessionState.isSharingAudio && !sessionState.isMicMuted) EmeraldSuccess else RoseError
+                    )
+                    Text("• E2E Security: WebRTC DTLS/SRTP (STUN/TURN Relay)", fontSize = 12.sp, color = TextSecondary)
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Quick Device Voice Controls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { com.omnicontrol.app.session.SessionManager.toggleMicrophone() },
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, if (sessionState.isMicMuted) RoseError else SlateBorder)
+                ) {
+                    Text(
+                        text = if (sessionState.isMicMuted) "Unmute Mic" else "Mute Mic",
+                        fontSize = 13.sp,
+                        color = if (sessionState.isMicMuted) RoseError else TextPrimary
+                    )
+                }
+
+                if (sessionState.isSharingAudio) {
+                    OutlinedButton(
+                        onClick = { com.omnicontrol.app.session.SessionManager.stopVoiceTransmission() },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, AmberWarning)
+                    ) {
+                        Text("Stop Audio", fontSize = 13.sp, color = AmberWarning)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Big Immediate End Session Button
             Button(
