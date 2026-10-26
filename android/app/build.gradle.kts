@@ -21,13 +21,37 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val ksFile = file("release.jks")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = "omnicontrol123"
+                keyAlias = "omnicontrol"
+                keyPassword = "omnicontrol123"
+                v1SigningEnabled = true
+                v2SigningEnabled = true
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            val releaseConfig = signingConfigs.getByName("release")
+            if (releaseConfig.storeFile?.exists() == true) {
+                signingConfig = releaseConfig
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            val releaseConfig = signingConfigs.getByName("release")
+            if (releaseConfig.storeFile?.exists() == true) {
+                signingConfig = releaseConfig
+            }
         }
     }
     compileOptions {
