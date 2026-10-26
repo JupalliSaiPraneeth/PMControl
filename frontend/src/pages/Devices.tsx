@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Smartphone, Plus, Trash2, Radio, Battery, Wifi, ShieldAlert, X, Copy, Check, Clock } from 'lucide-react';
+import { Smartphone, Plus, Trash2, Radio, Battery, Wifi, ShieldAlert, X, Copy, Check, Clock, Download } from 'lucide-react';
 import { api } from '../services/api.js';
 import { Device, PairingCodeResponse } from '../types/index.js';
 
@@ -72,13 +72,23 @@ export const Devices: React.FC = () => {
             Enrolled Android devices authorized for secure remote support sessions.
           </p>
         </div>
-        <button
-          onClick={handleStartPairing}
-          className="flex items-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-sky-500/25 transition"
-        >
-          <Plus className="w-4 h-4" />
-          Pair New Android Device
-        </button>
+        <div className="flex items-center gap-3">
+          <a
+            href="/OmniControl.apk"
+            download="OmniControl.apk"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-500/20 transition"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download APK</span>
+          </a>
+          <button
+            onClick={handleStartPairing}
+            className="flex items-center gap-2 px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-sky-500/25 transition"
+          >
+            <Plus className="w-4 h-4" />
+            Pair New Device
+          </button>
+        </div>
       </div>
 
       {loading ? (
