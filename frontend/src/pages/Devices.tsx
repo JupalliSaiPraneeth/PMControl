@@ -74,7 +74,7 @@ export const Devices: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href="/OmniControl.apk"
+            href="http://172.16.34.44:4000/download/OmniControl.apk"
             download="OmniControl.apk"
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-emerald-500/20 transition"
           >

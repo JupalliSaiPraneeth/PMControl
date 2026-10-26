@@ -47,6 +47,7 @@ jobs:
             --ks-pass pass:omnicontrol123 \
             --ks-key-alias omnicontrol \
             --key-pass pass:omnicontrol123 \
+            --min-sdk-version 21 \
             --v1-signing-enabled true \
             --v2-signing-enabled true \
             --v3-signing-enabled true \
@@ -56,6 +57,7 @@ jobs:
             --ks-pass pass:omnicontrol123 \
             --ks-key-alias omnicontrol \
             --key-pass pass:omnicontrol123 \
+            --min-sdk-version 21 \
             --v1-signing-enabled true \
             --v2-signing-enabled true \
             --v3-signing-enabled true \
