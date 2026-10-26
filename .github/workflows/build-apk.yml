@@ -34,14 +34,14 @@ jobs:
         run: |
           yes | sdkmanager --licenses || yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
-      - name: Build Signed APK with Gradle
+      - name: Build Debug and Release APKs with Gradle
         working-directory: ./android
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: gradle assembleDebug assembleRelease --no-daemon --stacktrace
 
-      - name: Sign APK with V1 (JAR), V2, and V3 Schemes
+      - name: Sign Release APK with V1 (JAR), V2, and V3 Schemes
         run: |
           APK="android/app/build/outputs/apk/release/app-release.apk"
-          echo "Explicitly applying V1 (JAR) and V2 signatures via apksigner..."
+          echo "Explicitly applying V1 (JAR), V2, and V3 signatures via apksigner..."
           ($ANDROID_HOME/build-tools/35.0.0/apksigner sign \
             --ks android/app/release.keystore \
             --ks-pass pass:omnicontrol123 \
@@ -63,18 +63,52 @@ jobs:
             --v3-signing-enabled true \
             "$APK")
 
-      - name: Verify APK Signatures
+      - name: Comprehensive APK Verification & Diagnostics Report
         run: |
-          APK="android/app/build/outputs/apk/release/app-release.apk"
-          echo "Verifying signatures on $APK..."
-          $ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$APK" || \
-          $ANDROID_HOME/build-tools/34.0.0/apksigner verify --verbose "$APK"
+          RELEASE_APK="android/app/build/outputs/apk/release/app-release.apk"
+          DEBUG_APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          
+          echo "=========================================================="
+          echo "📋 OMNICONTROL APK VERIFICATION & INTEGRITY REPORT"
+          echo "=========================================================="
+          
+          echo "1. Checking File Existence and Sizes:"
+          ls -lh "$RELEASE_APK" "$DEBUG_APK"
+          
+          echo ""
+          echo "2. SHA-256 Checksums:"
+          sha256sum "$RELEASE_APK" "$DEBUG_APK"
+          
+          echo ""
+          echo "3. Verifying Release APK Signatures (V1, V2, V3):"
+          ($ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$RELEASE_APK") || \
+          ($ANDROID_HOME/build-tools/34.0.0/apksigner verify --verbose "$RELEASE_APK")
+          
+          echo ""
+          echo "4. Verifying Debug APK Signatures:"
+          ($ANDROID_HOME/build-tools/35.0.0/apksigner verify --verbose "$DEBUG_APK") || \
+          ($ANDROID_HOME/build-tools/34.0.0/apksigner verify --verbose "$DEBUG_APK")
+          
+          echo ""
+          echo "5. Inspecting Package Badging (aapt2):"
+          AAPT2_PATH=$(find $ANDROID_HOME/build-tools -name aapt2 | head -n 1)
+          if [ -n "$AAPT2_PATH" ]; then
+            $AAPT2_PATH dump badging "$RELEASE_APK" | grep -E "(package|sdkVersion|targetSdkVersion|launchable-activity|native-code)" || true
+          fi
+          echo "=========================================================="
 
-      - name: Upload APK Artifact
+      - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: OmniControl-APK
+          name: OmniControl-Release-APK
           path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OmniControl-Debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
       - name: Prepare APK for Direct Download
@@ -91,8 +125,14 @@ jobs:
           make_latest: true
           body: |
             ### 📱 OmniControl Mobile Client
-            Direct download for Android devices (no extraction required):
+            Direct download for Android devices (no zip extraction needed):
             - **[📥 Download OmniControl.apk](https://github.com/${{ github.repository }}/releases/download/latest/OmniControl.apk)**
+            
+            **Build Details:**
+            - Application ID: `com.omnicontrol.app`
+            - Min SDK: `21` (Android 5.0+)
+            - Target SDK: `34` (Android 14)
+            - Signature Schemes: **V1 (JAR) + V2 + V3 Enabled**
           files: OmniControl.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
