@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">OmniControl</string>
+    <string name="accessibility_service_description">OmniControl uses Accessibility Services solely to perform user-authorized touch actions (taps and swipes) during active, explicitly initiated remote-support sessions. No user input or passwords are recorded or stored.</string>
+</resources>

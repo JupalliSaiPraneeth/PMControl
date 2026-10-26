@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Attempt to locate JAVA_HOME if not set
+if [ -z "$JAVA_HOME" ] ; then
+    if [ -d "/Applications/Android Studio.app/Contents/jbr/Contents/Home" ] ; then
+        export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+    elif [ -d "/Library/Java/JavaVirtualMachines" ] ; then
+        for jvm in /Library/Java/JavaVirtualMachines/*/Contents/Home ; do
+            if [ -d "$jvm" ] ; then
+                export JAVA_HOME="$jvm"
+                break
+            fi
+        done
+    fi
+fi
+
+exec gradle "$@"
