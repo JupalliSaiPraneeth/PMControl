@@ -12,6 +12,9 @@ jobs:
     name: Build OmniControl Debug APK
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -41,3 +44,23 @@ jobs:
           name: OmniControl-Debug-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Prepare APK for Direct Download
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk OmniControl.apk
+
+      - name: Publish Direct APK to GitHub Releases
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "OmniControl Android Client (Latest APK)"
+          draft: false
+          prerelease: false
+          make_latest: true
+          body: |
+            ### 📱 OmniControl Mobile Client
+            Direct download for Android devices (no extraction required):
+            - **[📥 Download OmniControl.apk](https://github.com/${{ github.repository }}/releases/download/latest/OmniControl.apk)**
+          files: OmniControl.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
