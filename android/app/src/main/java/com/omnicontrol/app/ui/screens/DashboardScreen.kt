@@ -2,6 +2,7 @@ package com.omnicontrol.app.ui.screens
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,7 +57,7 @@ fun DashboardScreen(
                 Surface(
                     color = EmeraldSuccess.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(20.dp),
-                    border = ButtonDefaults.outlinedButtonBorder
+                    border = BorderStroke(1.dp, EmeraldSuccess.copy(alpha = 0.4f))
                 ) {
                     Text(
                         text = "● Paired",
@@ -72,7 +73,7 @@ fun DashboardScreen(
             Surface(
                 color = SlateSurface,
                 shape = RoundedCornerShape(16.dp),
-                border = ButtonDefaults.outlinedButtonBorder,
+                border = BorderStroke(1.dp, SlateBorder),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

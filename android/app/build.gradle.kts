@@ -64,7 +64,7 @@ dependencies {
     implementation("io.socket:socket.io-client:2.1.1") {
         exclude(group = "org.json", module = "json")
     }
-    implementation("io.getstream:stream-webrtc-android:1.3.1")
+    implementation("io.getstream:stream-webrtc-android:1.3.10")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")

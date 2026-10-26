@@ -2,10 +2,15 @@ package com.omnicontrol.app.session
 
 import android.content.Context
 import android.content.Intent
+import com.omnicontrol.app.pairing.PairingRepository
 import com.omnicontrol.app.webrtc.WebRtcManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class ActiveSessionState(
     val isActive: Boolean = false,
@@ -31,13 +36,13 @@ object SessionManager {
         val rtc = WebRtcManager(context)
         webRtcManager = rtc
 
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            val repository = com.omnicontrol.app.pairing.PairingRepository(context)
+        CoroutineScope(Dispatchers.IO).launch {
+            val repository = PairingRepository(context)
             val serverUrl = repository.getServerUrl()
             val deviceId = repository.getDeviceId() ?: current.deviceId ?: "device-android"
             val sessionId = current.sessionId ?: "active-session"
 
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
                 rtc.initialize(serverUrl, sessionId, deviceId)
                 rtc.startScreenCapture(resultCode, resultData)
 

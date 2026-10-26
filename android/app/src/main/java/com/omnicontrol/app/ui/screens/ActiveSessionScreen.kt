@@ -1,5 +1,6 @@
 package com.omnicontrol.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,7 +36,7 @@ fun ActiveSessionScreen(
             Surface(
                 color = EmeraldSuccess.copy(alpha = 0.15f),
                 shape = RoundedCornerShape(32.dp),
-                border = ButtonDefaults.outlinedButtonBorder,
+                border = BorderStroke(1.dp, EmeraldSuccess.copy(alpha = 0.3f)),
                 modifier = Modifier.size(100.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -62,7 +63,7 @@ fun ActiveSessionScreen(
                 color = SlateSurface,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth(),
-                border = ButtonDefaults.outlinedButtonBorder
+                border = BorderStroke(1.dp, SlateBorder)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Active Streams", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = SkyPrimary)

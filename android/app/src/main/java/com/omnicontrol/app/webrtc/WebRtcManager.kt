@@ -14,6 +14,7 @@ import org.webrtc.*
 
 class WebRtcManager(private val context: Context) {
 
+    private val rootEglBase: EglBase = EglBase.create()
     private var socket: Socket? = null
     private var peerConnectionFactory: PeerConnectionFactory? = null
     private var peerConnection: PeerConnection? = null
@@ -34,8 +35,8 @@ class WebRtcManager(private val context: Context) {
         PeerConnectionFactory.initialize(options)
 
         val factory = PeerConnectionFactory.builder()
-            .setVideoEncoderFactory(DefaultVideoEncoderFactory(EglBase.create().eglBaseContext, true, true))
-            .setVideoDecoderFactory(DefaultVideoDecoderFactory(EglBase.create().eglBaseContext))
+            .setVideoEncoderFactory(DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, true))
+            .setVideoDecoderFactory(DefaultVideoDecoderFactory(rootEglBase.eglBaseContext))
             .createPeerConnectionFactory()
         peerConnectionFactory = factory
 
@@ -135,9 +136,9 @@ class WebRtcManager(private val context: Context) {
         })
         videoCapturer = capturer
 
-        val surfaceTextureHelper = SurfaceTextureHelper.create("ScreenCaptureThread", EglBase.create().eglBaseContext)
-        val videoSource = factory.createVideoSource(capturer.isScreencast)
-        capturer.initialize(surfaceTextureHelper, context, videoSource.adaptor)
+        val surfaceTextureHelper = SurfaceTextureHelper.create("ScreenCaptureThread", rootEglBase.eglBaseContext)
+        val videoSource = factory.createVideoSource(true)
+        capturer.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
 
         // Determine screen dimensions
         val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

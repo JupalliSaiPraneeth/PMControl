@@ -1,5 +1,6 @@
 package com.omnicontrol.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,7 +38,7 @@ fun WelcomeScreen(
                 color = SlateSurface,
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier.size(80.dp),
-                border = ButtonDefaults.outlinedButtonBorder
+                border = BorderStroke(1.dp, SlateBorder)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
@@ -90,7 +91,7 @@ fun WelcomeScreen(
                 color = SlateSurface,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-                border = ButtonDefaults.outlinedButtonBorder
+                border = BorderStroke(1.dp, SlateBorder)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
